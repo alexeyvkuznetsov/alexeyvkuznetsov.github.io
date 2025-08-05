@@ -1,0 +1,111 @@
+/* --- CSS Переменные --- */
+:root {
+    --bg-color: #f4f7f9;
+    --panel-bg-color: #ffffff;
+    --card-bg-color: #ffffff;
+    --text-color: #333333;
+    --label-color: #555555;
+    --accent-color: #0056b3;
+    --accent-color-light: rgba(0, 86, 179, 0.1);
+    --border-color: #e0e0e0;
+    --shadow-color: rgba(0, 0, 0, 0.08);
+}
+
+/* --- Базовые стили --- */
+*, *::before, *::after { box-sizing: border-box; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+/* --- Заголовок --- */
+.app-header {
+    background-color: var(--panel-bg-color);
+    padding: 1rem 2rem;
+    border-bottom: 1px solid var(--border-color);
+    text-align: center;
+}
+.app-header h1 { margin: 0; color: var(--accent-color); font-size: 1.8rem; }
+.app-header p { margin: 0.25rem 0 0; color: var(--label-color); }
+
+/* --- Основной макет дашборда (3 колонки) --- */
+.dashboard-container {
+    display: grid;
+    grid-template-columns: 280px 1fr 320px; /* Фильтры | Контент | Статистика */
+    gap: 1.5rem;
+    padding: 1.5rem;
+    align-items: start;
+}
+
+/* --- Колонка Фильтров --- */
+.filter-panel { background-color: var(--panel-bg-color); padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 10px var(--shadow-color); }
+.filter-panel h2 { margin-top: 0; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; font-size: 1.4rem; }
+.filter-group { margin-bottom: 1.25rem; }
+.filter-group label { display: block; font-weight: 600; color: var(--label-color); margin-bottom: 0.5rem; }
+.filter-group select { width: 100%; padding: 0.6rem; border: 1px solid var(--border-color); border-radius: 4px; background-color: #fff; font-size: 0.95rem; cursor: pointer; }
+.filter-group select:focus { outline: none; border-color: var(--accent-color); box-shadow: 0 0 0 2px rgba(0, 86, 179, 0.2); }
+
+/* --- Основной контент (средняя колонка) --- */
+.main-content { min-width: 300px; }
+.results-counter { margin-bottom: 1rem; padding: 0.75rem 1rem; background-color: var(--accent-color-light); border-left: 4px solid var(--accent-color); border-radius: 4px; font-weight: 500; }
+.events-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; }
+
+/* --- Карточка события --- */
+.event-card { background-color: var(--card-bg-color); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 10px var(--shadow-color); transition: transform 0.2s ease, box-shadow 0.2s ease; display: flex; flex-direction: column; }
+.event-card:hover { transform: translateY(-5px); box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12); }
+.event-card h3 { margin: 0 0 1rem; color: var(--accent-color); font-size: 1.2rem; border-bottom: 1px solid #f0f0f0; padding-bottom: 0.75rem; }
+.event-card .description { font-style: italic; color: #444; margin-bottom: 1rem; flex-grow: 1; }
+.event-card .details { margin-top: auto; font-size: 0.9rem; }
+.event-card .detail-item { display: flex; margin-bottom: 0.5rem; }
+.event-card .detail-item strong { flex: 0 0 120px; color: var(--label-color); }
+
+/* --- Колонка Статистики --- */
+.stats-panel { display: flex; flex-direction: column; gap: 1.5rem; }
+.stat-widget { background-color: var(--panel-bg-color); padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 10px var(--shadow-color); }
+.stat-widget h3 { margin-top: 0; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); font-size: 1.2rem; }
+.stat-widget .empty-state { color: var(--label-color); text-align: center; padding: 1rem 0; }
+
+/* --- Виджет: Временная шкала --- */
+.timeline-container { position: relative; height: 150px; padding: 10px 0; }
+.timeline-line { position: absolute; left: 0; top: 50%; width: 100%; height: 3px; background-color: var(--border-color); transform: translateY(-50%); }
+.timeline-event { position: absolute; top: 50%; width: 12px; height: 12px; background-color: var(--accent-color); border-radius: 50%; transform: translate(-50%, -50%); cursor: pointer; transition: transform 0.2s ease; }
+.timeline-event:hover { transform: translate(-50%, -50%) scale(1.5); }
+.timeline-tooltip { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background-color: var(--text-color); color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.85rem; white-space: nowrap; visibility: hidden; opacity: 0; transition: opacity 0.2s; z-index: 10; }
+.timeline-event:hover .timeline-tooltip { visibility: visible; opacity: 1; }
+
+/* --- Виджеты: Статистика по спискам (Гео, Эмоции) --- */
+.list-stats-container { font-size: 0.9rem; max-height: 250px; overflow-y: auto; padding-right: 10px; }
+.list-item { display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid #f0f0f0; }
+.list-item:last-child { border-bottom: none; }
+.list-item .label { color: var(--text-color); }
+.list-item .count { font-weight: 600; background-color: var(--accent-color-light); padding: 0 6px; border-radius: 10px; color: var(--accent-color); }
+.emotion-list .list-item { flex-direction: column; align-items: flex-start; }
+.emotion-list .emotion-quote { font-style: italic; color: #666; padding-left: 10px; border-left: 2px solid var(--border-color); margin-top: 5px; width: 100%; }
+
+/* --- Виджет: Гистограмма --- */
+.bar-chart-container { display: flex; flex-direction: column; gap: 0.8rem; }
+.bar-row { display: grid; grid-template-columns: 100px 1fr 30px; align-items: center; gap: 10px; font-size: 0.9rem; }
+.bar-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar-wrapper { background-color: #f0f0f0; border-radius: 4px; }
+.bar { height: 20px; background-color: var(--accent-color); border-radius: 4px; transition: width 0.5s ease-out; }
+.bar-value { font-weight: 600; text-align: right; }
+
+/* --- Виджет: Облако ключевых слов --- */
+.keyword-cloud-container { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; justify-content: center; align-items: center; }
+.keyword-item { cursor: default; transition: color 0.2s; }
+.keyword-item:hover { color: var(--accent-color); }
+
+/* --- Сообщение об отсутствии результатов --- */
+.no-results { grid-column: 1 / -1; text-align: center; padding: 3rem; font-size: 1.2rem; color: var(--label-color); }
+
+/* --- Адаптивность --- */
+@media (max-width: 1200px) {
+    .dashboard-container { grid-template-columns: 280px 1fr; }
+    .stats-panel { grid-column: 1 / -1; /* Статистика уходит вниз */ display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+}
+@media (max-width: 768px) {
+    .dashboard-container { grid-template-columns: 1fr; }
+}
