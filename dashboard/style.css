@@ -1018,21 +1018,25 @@ select.form-control {
 }
 
 /* Custom scrollbar */
-.table-wrapper::-webkit-scrollbar {
+.table-wrapper::-webkit-scrollbar,
+.emotion-chronology::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
-.table-wrapper::-webkit-scrollbar-track {
+.table-wrapper::-webkit-scrollbar-track,
+.emotion-chronology::-webkit-scrollbar-track {
   background: var(--color-secondary);
 }
 
-.table-wrapper::-webkit-scrollbar-thumb {
+.table-wrapper::-webkit-scrollbar-thumb,
+.emotion-chronology::-webkit-scrollbar-thumb {
   background: var(--color-border);
   border-radius: var(--radius-sm);
 }
 
-.table-wrapper::-webkit-scrollbar-thumb:hover {
+.table-wrapper::-webkit-scrollbar-thumb:hover,
+.emotion-chronology::-webkit-scrollbar-thumb:hover {
   background: var(--color-text-secondary);
 }
 
@@ -1157,6 +1161,69 @@ select.form-control {
   padding: var(--space-2) var(--space-8);
   border-radius: var(--radius-sm);
   font-size: var(--font-size-xs);
+}
+
+/* Keyword Cloud Styles */
+.keyword-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-4) var(--space-8);
+    min-height: 150px;
+}
+
+.keyword-cloud-item {
+    cursor: default;
+    transition: color var(--duration-fast) ease-in-out;
+}
+
+.keyword-cloud-item:hover {
+    color: var(--color-primary);
+}
+
+/* Emotion Chronology Styles */
+.emotion-chronology {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: var(--space-8);
+}
+
+.emotion-item {
+    padding-bottom: var(--space-12);
+    margin-bottom: var(--space-12);
+    border-bottom: 1px solid var(--color-card-border-inner);
+}
+.emotion-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.emotion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--space-6);
+}
+
+.emotion-header__date {
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-secondary);
+}
+
+.emotion-header__type {
+    font-weight: var(--font-weight-semibold);
+    text-align: right;
+}
+
+.emotion-quote {
+    font-size: var(--font-size-sm);
+    font-style: italic;
+    color: var(--color-text-secondary);
+    border-left: 3px solid var(--color-border);
+    padding-left: var(--space-12);
+    margin: 0;
 }
 
 
