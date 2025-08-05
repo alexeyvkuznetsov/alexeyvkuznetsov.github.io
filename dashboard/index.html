@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Интерактивный дашборд анализа дневника 1849 года</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div id="app">
+        <header class="header">
+            <h1>Дашборд анализа исторического дневника 1849 года</h1>
+            <p class="header-subtitle">Анализ событий периода революций 1848-49 годов</p>
+        </header>
+
+        <div class="dashboard-container">
+            <!-- Панель фильтров -->
+            <aside class="filters-panel">
+                <div class="filter-header">
+                    <h3>Фильтры</h3>
+                    <button id="reset-filters" class="btn btn--sm btn--outline">Сбросить все</button>
+                </div>
+
+                <div class="filter-group">
+                    <label class="form-label">Месяц</label>
+                    <select id="month-filter" class="form-control">
+                        <option value="">Все месяцы</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="form-label">Категория событий</label>
+                    <select id="category-filter" class="form-control">
+                        <option value="">Все категории</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="form-label">Локация</label>
+                    <select id="location-filter" class="form-control">
+                        <option value="">Все локации</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="form-label">Тип источника</label>
+                    <select id="source-filter" class="form-control">
+                        <option value="">Все источники</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="form-label">Уровень достоверности</label>
+                    <select id="confidence-filter" class="form-control">
+                        <option value="">Все уровни</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="form-label">Поиск по тексту</label>
+                    <input type="text" id="text-search" class="form-control" placeholder="Введите текст для поиска...">
+                </div>
+            </aside>
+
+            <!-- Основная область -->
+            <main class="main-content">
+                <!-- Карточки статистики -->
+                <div class="stats-cards">
+                    <div class="card stats-card">
+                        <div class="card__body">
+                            <h4>Всего событий</h4>
+                            <div class="stat-value" id="total-events">0</div>
+                        </div>
+                    </div>
+                    <div class="card stats-card">
+                        <div class="card__body">
+                            <h4>Период</h4>
+                            <div class="stat-value" id="date-range">-</div>
+                        </div>
+                    </div>
+                    <div class="card stats-card">
+                        <div class="card__body">
+                            <h4>Отфильтровано</h4>
+                            <div class="stat-value" id="filtered-events">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Графики -->
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <div class="card">
+                            <div class="card__header">
+                                <h4>Временное распределение событий</h4>
+                            </div>
+                            <div class="card__body">
+                                <canvas id="timeline-chart" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="card">
+                            <div class="card__header">
+                                <h4>Распределение по категориям</h4>
+                            </div>
+                            <div class="card__body">
+                                <canvas id="category-chart" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="card">
+                            <div class="card__header">
+                                <h4>Топ-10 локаций</h4>
+                            </div>
+                            <div class="card__body">
+                                <canvas id="location-chart" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Таблица событий -->
+                <div class="table-container">
+                    <div class="card">
+                        <div class="card__header">
+                            <h4>Детальная информация о событиях</h4>
+                            <button id="export-csv" class="btn btn--sm btn--primary">Экспорт в CSV</button>
+                        </div>
+                        <div class="card__body">
+                            <div class="table-wrapper">
+                                <table id="events-table">
+                                    <thead>
+                                        <tr>
+                                            <th data-sort="source_date">Дата</th>
+                                            <th data-sort="event_name">Событие</th>
+                                            <th data-sort="location_normalized">Локация</th>
+                                            <th data-sort="information_source_type">Источник</th>
+                                            <th data-sort="confidence">Достоверность</th>
+                                            <th>Описание</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="events-tbody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Статистическая панель -->
+            <aside class="stats-panel">
+                <div class="card">
+                    <div class="card__header">
+                        <h4>Текущие фильтры</h4>
+                    </div>
+                    <div class="card__body">
+                        <div id="active-filters" class="active-filters">
+                            <p class="no-filters">Фильтры не применены</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card__header">
+                        <h4>Распределение по источникам</h4>
+                    </div>
+                    <div class="card__body">
+                        <canvas id="source-chart" height="200"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card__header">
+                        <h4>Распределение по достоверности</h4>
+                    </div>
+                    <div class="card__body">
+                        <canvas id="confidence-chart" height="200"></canvas>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <div id="loading" class="loading">
+        <div class="loading-spinner"></div>
+        <p>Загрузка данных...</p>
+    </div>
+
+    <!-- Модальное окно для детальной информации -->
+    <div id="event-modal-overlay" class="modal-overlay hidden">
+        <div id="event-modal" class="modal">
+            <div class="modal__header">
+                <h3 id="modal-title">Детальная информация о событии</h3>
+                <button id="modal-close-btn" class="btn--close" aria-label="Закрыть окно">×</button>
+            </div>
+            <div id="modal-body" class="modal__body">
+                <!-- Содержимое будет вставлено динамически -->
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
