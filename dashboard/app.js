@@ -78,7 +78,6 @@ class HistoricalDashboard {
         this.populateConfidenceFilter();
     }
 
-    // ... (Все populate-функции остаются без изменений) ...
     populateMonthFilter() {
         const monthFilter = document.getElementById('month-filter');
         const months = new Set();
@@ -221,7 +220,6 @@ class HistoricalDashboard {
         this.updateActiveFilters();
     }
 
-    // ... (updateActiveFilters, initializeCharts, updateStats, updateCharts остаются без изменений) ...
     updateActiveFilters() {
         const container = document.getElementById('active-filters');
         const hasFilters = Object.values(this.filters).some(filter => filter !== '');
@@ -240,6 +238,7 @@ class HistoricalDashboard {
         });
         container.innerHTML = activeFilters.join('');
     }
+
     initializeCharts() {
         this.initTimelineChart();
         this.initCategoryChart();
@@ -252,6 +251,16 @@ class HistoricalDashboard {
     initLocationChart() { const ctx = document.getElementById('location-chart').getContext('2d'); this.charts.location = new Chart(ctx, { type: 'bar', data: { labels: [], datasets: [{ label: 'Количество событий', data: [], backgroundColor: '#2563eb' }] }, options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } } } }); }
     initSourceChart() { const ctx = document.getElementById('source-chart').getContext('2d'); this.charts.source = new Chart(ctx, { type: 'pie', data: { labels: [], datasets: [{ data: [], backgroundColor: ['#1FB8CD', '#FFC185', '#B4413C', '#ECEBD5', '#5D878F'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 10 } } } } } }); }
     initConfidenceChart() { const ctx = document.getElementById('confidence-chart').getContext('2d'); this.charts.confidence = new Chart(ctx, { type: 'bar', data: { labels: [], datasets: [{ label: 'Количество событий', data: [], backgroundColor: ['#10b981', '#f59e0b', '#ef4444'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } } }); }
+
+    updateDashboard() {
+        this.updateStats();
+        this.updateCharts();
+        this.updateTable();
+        this.renderKeywordCloud(this.filteredData);
+        this.renderEmotionChronology(this.filteredData);
+        this.hideLoading();
+    }
+
     updateStats() {
         document.getElementById('total-events').textContent = this.data.length;
         document.getElementById('filtered-events').textContent = this.filteredData.length;
@@ -262,6 +271,7 @@ class HistoricalDashboard {
             document.getElementById('date-range').textContent = `${startDate} - ${endDate}`;
         }
     }
+
     updateCharts() {
         this.updateTimelineChart();
         this.updateCategoryChart();
@@ -269,23 +279,67 @@ class HistoricalDashboard {
         this.updateSourceChart();
         this.updateConfidenceChart();
     }
-    updateTimelineChart() { const monthCounts = {}; const monthNames = { '1849-01': 'Янв', '1849-02': 'Фев', '1849-03': 'Мар', '1849-04': 'Апр', '1849-05': 'Май', '1849-06': 'Июн', '1849-07': 'Июл', '1849-08': 'Авг', '1849-09': 'Сен' }; this.filteredData.forEach(event => { const date = new Date(event.source_date); const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`; monthCounts[monthKey] = (monthCounts[monthKey] || 0) + 1; }); const labels = Object.keys(monthNames); const data = labels.map(month => monthCounts[month] || 0); this.charts.timeline.data.labels = labels.map(month => monthNames[month]); this.charts.timeline.data.datasets[0].data = data; this.charts.timeline.update(); }
+
+    // START: ИЗМЕНЕНИЯ ЗДЕСЬ
+    /**
+     * Вспомогательная функция для получения даты начала недели (понедельника).
+     * @param {Date|string} d - Дата.
+     * @returns {Date} - Объект Date, соответствующий понедельнику.
+     */
+    _getWeekStartDate(d) {
+        const date = new Date(d);
+        const day = date.getDay(); // 0=Вс, 1=Пн, ..., 6=Сб
+        const diff = date.getDate() - day + (day === 0 ? -6 : 1); // Поправка на воскресенье
+        const monday = new Date(date.setDate(diff));
+        monday.setHours(0, 0, 0, 0); // Сбрасываем время для точного ключа
+        return monday;
+    }
+
+    updateTimelineChart() {
+        const weekCounts = {};
+
+        // 1. Агрегируем события по неделям
+        this.filteredData.forEach(event => {
+            const weekStart = this._getWeekStartDate(event.source_date);
+            const weekKey = weekStart.toISOString().split('T')[0]; // 'YYYY-MM-DD'
+            weekCounts[weekKey] = (weekCounts[weekKey] || 0) + 1;
+        });
+
+        // 2. Сортируем недели хронологически
+        const sortedWeeks = Object.keys(weekCounts).sort();
+
+        if (sortedWeeks.length === 0) {
+            this.charts.timeline.data.labels = [];
+            this.charts.timeline.data.datasets[0].data = [];
+            this.charts.timeline.update();
+            return;
+        }
+
+        // 3. Формируем метки (labels) и данные (data) для графика
+        const labels = sortedWeeks.map(weekKey => {
+            const startDate = new Date(weekKey);
+            const endDate = new Date(startDate);
+            endDate.setDate(startDate.getDate() + 6);
+
+            const format = (date) => `${String(date.getDate()).padStart(2, '0')}.${String(date.getMonth() + 1).padStart(2, '0')}`;
+
+            return `${format(startDate)}–${format(endDate)}`;
+        });
+
+        const data = sortedWeeks.map(weekKey => weekCounts[weekKey]);
+
+        // 4. Обновляем график
+        this.charts.timeline.data.labels = labels;
+        this.charts.timeline.data.datasets[0].data = data;
+        this.charts.timeline.update();
+    }
+    // END: ИЗМЕНЕНИЯ ЗДЕСЬ
+
     updateCategoryChart() { const categoryCounts = {}; const categoryNames = { 'REV1848_': 'Революции 1848-49', 'RU_': 'Российские реакции', 'AUTHOR_': 'Авторские восприятия', 'IDEOLOGIES_': 'Идеологии и причины', 'OTHER_': 'Прочее' }; this.filteredData.forEach(event => { if (event.event_id) { const prefix = event.event_id.split('_')[0] + '_'; const categoryName = categoryNames[prefix] || 'Прочее'; categoryCounts[categoryName] = (categoryCounts[categoryName] || 0) + 1; } }); this.charts.category.data.labels = Object.keys(categoryCounts); this.charts.category.data.datasets[0].data = Object.values(categoryCounts); this.charts.category.update(); }
     updateLocationChart() { const locationCounts = {}; this.filteredData.forEach(event => { if (event.location_normalized) { locationCounts[event.location_normalized] = (locationCounts[event.location_normalized] || 0) + 1; } }); const sortedLocations = Object.entries(locationCounts).sort(([, a], [, b]) => b - a).slice(0, 10); this.charts.location.data.labels = sortedLocations.map(([location]) => location); this.charts.location.data.datasets[0].data = sortedLocations.map(([, count]) => count); this.charts.location.update(); }
     updateSourceChart() { const sourceCounts = {}; this.filteredData.forEach(event => { if (event.information_source_type) { const shortName = this.getShortSourceName(event.information_source_type); sourceCounts[shortName] = (sourceCounts[shortName] || 0) + 1; } }); this.charts.source.data.labels = Object.keys(sourceCounts); this.charts.source.data.datasets[0].data = Object.values(sourceCounts); this.charts.source.update(); }
     updateConfidenceChart() { const confidenceCounts = {}; const confidenceNames = { 'High': 'Высокий', 'Medium': 'Средний', 'Low': 'Низкий' }; this.filteredData.forEach(event => { if (event.confidence) { const name = confidenceNames[event.confidence] || event.confidence; confidenceCounts[name] = (confidenceCounts[name] || 0) + 1; } }); this.charts.confidence.data.labels = Object.keys(confidenceCounts); this.charts.confidence.data.datasets[0].data = Object.values(confidenceCounts); this.charts.confidence.update(); }
     getShortSourceName(sourceName) { const shortNames = { 'Официальные источники (газеты, манифесты)': 'Офиц. источники', 'Личные наблюдения и опыт автора': 'Личн. опыт', 'Неофициальные сведения (слухи, разговоры в обществе)': 'Слухи', 'Информация от конкретного лица (именованный источник)': 'Именов. источник', 'Источник неясен/не указан': 'Неясный источник' }; return shortNames[sourceName] || sourceName; }
-
-    updateDashboard() {
-        this.updateStats();
-        this.updateCharts();
-        this.updateTable();
-        // START: Вызов новых функций рендеринга
-        this.renderKeywordCloud(this.filteredData);
-        this.renderEmotionChronology(this.filteredData);
-        // END: Вызов новых функций
-        this.hideLoading();
-    }
 
     updateTable() {
         const tbody = document.getElementById('events-tbody');
@@ -330,11 +384,7 @@ class HistoricalDashboard {
     }
 
     getConfidenceBadge(confidence) {
-        const badges = {
-            'High': '<span class="status-badge status-badge--high">Высокий</span>',
-            'Medium': '<span class="status-badge status-badge--medium">Средний</span>',
-            'Low': '<span class="status-badge status-badge--low">Низкий</span>'
-        };
+        const badges = { 'High': '<span class="status-badge status-badge--high">Высокий</span>', 'Medium': '<span class="status-badge status-badge--medium">Средний</span>', 'Low': '<span class="status-badge status-badge--low">Низкий</span>' };
         return badges[confidence] || confidence;
     }
 
@@ -345,14 +395,9 @@ class HistoricalDashboard {
             this.sortState.column = column;
             this.sortState.direction = 'asc';
         }
-
-        document.querySelectorAll('#events-table th').forEach(th => {
-            th.classList.remove('sort-asc', 'sort-desc');
-        });
-
+        document.querySelectorAll('#events-table th').forEach(th => th.classList.remove('sort-asc', 'sort-desc'));
         const activeHeader = document.querySelector(`#events-table th[data-sort="${column}"]`);
         activeHeader.classList.add(`sort-${this.sortState.direction}`);
-
         this.updateTable();
     }
 
@@ -361,17 +406,12 @@ class HistoricalDashboard {
             alert('Нет данных для экспорта');
             return;
         }
-
         const headers = ['Дата', 'Событие', 'Локация', 'Источник', 'Достоверность', 'Описание', 'Фрагмент текста'];
         const csvContent = [
             headers.join(','),
             ...this.filteredData.map(event => [
-                event.source_date,
-                `"${event.event_name.replace(/"/g, '""')}"`,
-                `"${(event.location_normalized || 'Не указано').replace(/"/g, '""')}"`,
-                `"${event.information_source_type.replace(/"/g, '""')}"`,
-                event.confidence,
-                `"${event.description.replace(/"/g, '""')}"`,
+                event.source_date, `"${event.event_name.replace(/"/g, '""')}"`, `"${(event.location_normalized || 'Не указано').replace(/"/g, '""')}"`,
+                `"${event.information_source_type.replace(/"/g, '""')}"`, event.confidence, `"${event.description.replace(/"/g, '""')}"`,
                 `"${(event.text_fragment || '').replace(/"/g, '""')}"`
             ].join(','))
         ].join('\n');
@@ -390,19 +430,8 @@ class HistoricalDashboard {
     showEventDetails(eventId) {
         const event = this.data.find(e => e.unique_id === eventId);
         if (!event) return;
-
         this.modalTitle.textContent = event.event_name;
-
-        this.modalBody.innerHTML = `
-            <div class="modal-detail-item"><strong>Дата:</strong><p>${new Date(event.source_date).toLocaleDateString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' })}</p></div>
-            <div class="modal-detail-item"><strong>Описание:</strong><p>${event.description}</p></div>
-            <div class="modal-detail-item"><strong>Фрагмент текста:</strong><p><em>"${event.text_fragment || 'Нет данных'}"</em></p></div>
-            <div class="modal-detail-item"><strong>Локация:</strong><p>${event.location_normalized || 'Не указано'}</p></div>
-            <div class="modal-detail-item"><strong>Источник информации:</strong><p>${event.information_source_type}</p></div>
-            <div class="modal-detail-item"><strong>Краткий контекст:</strong><p>${event.brief_context || 'Нет данных'}</p></div>
-            <div class="modal-detail-item"><strong>Ключевые слова:</strong><div class="modal-keywords">${event.keywords.map(kw => `<span class="keyword-tag">${kw}</span>`).join('')}</div></div>
-        `;
-
+        this.modalBody.innerHTML = `<div class="modal-detail-item"><strong>Дата:</strong><p>${new Date(event.source_date).toLocaleDateString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' })}</p></div><div class="modal-detail-item"><strong>Описание:</strong><p>${event.description}</p></div><div class="modal-detail-item"><strong>Фрагмент текста:</strong><p><em>"${event.text_fragment || 'Нет данных'}"</em></p></div><div class="modal-detail-item"><strong>Локация:</strong><p>${event.location_normalized || 'Не указано'}</p></div><div class="modal-detail-item"><strong>Источник информации:</strong><p>${event.information_source_type}</p></div><div class="modal-detail-item"><strong>Краткий контекст:</strong><p>${event.brief_context || 'Нет данных'}</p></div><div class="modal-detail-item"><strong>Ключевые слова:</strong><div class="modal-keywords">${event.keywords.map(kw => `<span class="keyword-tag">${kw}</span>`).join('')}</div></div>`;
         this.modalOverlay.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
     }
@@ -416,7 +445,6 @@ class HistoricalDashboard {
         document.getElementById('loading').classList.add('hidden');
     }
 
-    // START: Новые методы для визуализаций
     renderKeywordCloud(events) {
         this.keywordCloudContainer.innerHTML = '';
         const keywordCounts = {};
@@ -425,24 +453,17 @@ class HistoricalDashboard {
                 keywordCounts[kw] = (keywordCounts[kw] || 0) + 1;
             });
         });
-
         const keywords = Object.entries(keywordCounts);
         if (keywords.length === 0) {
             this.keywordCloudContainer.innerHTML = '<p class="empty-state">Нет ключевых слов для отображения.</p>';
             return;
         }
-
         const counts = keywords.map(([, count]) => count);
         const minCount = Math.min(...counts);
         const maxCount = Math.max(...counts);
-
         keywords.sort((a, b) => b[1] - a[1]).slice(0, 40).sort((a,b) => a[0].localeCompare(b[0])).forEach(([word, count]) => {
             const minSize = 12, maxSize = 24;
-            // Рассчитываем размер шрифта, избегая деления на ноль
-            const size = (maxCount === minCount)
-                ? minSize
-                : minSize + ((count - minCount) / (maxCount - minCount)) * (maxSize - minSize);
-
+            const size = (maxCount === minCount) ? minSize : minSize + ((count - minCount) / (maxCount - minCount)) * (maxSize - minSize);
             const span = document.createElement('span');
             span.className = 'keyword-cloud-item';
             span.textContent = word;
@@ -454,21 +475,20 @@ class HistoricalDashboard {
 
     renderEmotionChronology(events) {
         this.emotionChronologyContainer.innerHTML = '';
-        const emotionalEvents = events.filter(e => e.event_id.startsWith('AUTHOR_PERCEPTION_'));
+        const emotionalEvents = events
+            .filter(e => e.event_id.startsWith('AUTHOR_PERCEPTION_'))
+            .sort((a, b) => new Date(a.source_date) - new Date(b.source_date));
 
         if (emotionalEvents.length === 0) {
             this.emotionChronologyContainer.innerHTML = '<p class="empty-state">Нет записей о восприятии автора.</p>';
             return;
         }
-
         emotionalEvents.forEach(event => {
             const item = document.createElement('div');
             item.className = 'emotion-item';
-
             const date = new Date(event.source_date).toLocaleDateString('ru-RU', { month: 'short', day: 'numeric' });
             const type = event.event_subtype_custom || event.event_name;
             const quote = event.text_fragment ? `"${event.text_fragment.substring(0, 120)}..."` : '';
-
             item.innerHTML = `
                 <div class="emotion-header">
                     <span class="emotion-header__date">${date}</span>
@@ -479,7 +499,6 @@ class HistoricalDashboard {
             this.emotionChronologyContainer.appendChild(item);
         });
     }
-    // END: Новые методы для визуализаций
 }
 
 // Инициализация приложения
