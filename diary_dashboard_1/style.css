@@ -653,7 +653,12 @@ select.form-control {
     format('woff2');
 }
 
-/* Dashboard specific styles */
+/* 
+==============================================
+    START: REWORKED DASHBOARD LAYOUT STYLES
+==============================================
+*/
+
 .header {
   background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
@@ -672,26 +677,28 @@ select.form-control {
   font-size: var(--font-size-lg);
 }
 
+/* Main Dashboard Container */
 .dashboard-container {
   display: grid;
+  /* NEW: align-items: start is crucial for sticky positioning to work correctly
+     without columns stretching to the height of the longest column. */
+  align-items: start; 
   grid-template-columns: 280px 1fr 320px;
   gap: var(--space-24);
   padding: var(--space-24);
-  min-height: calc(100vh - 140px);
   max-width: 1600px;
   margin: 0 auto;
 }
 
-/* Filters Panel */
+/* Filters Panel (Left Sidebar) */
 .filters-panel {
-  background: var(--color-background); /* ИЗМЕНЕНО */
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--space-20);
-  height: fit-content;
+  /* MODIFIED: position: sticky makes this panel "stick" to the top on scroll */
   position: sticky;
   top: var(--space-24);
-  align-self: start; /* ДОБАВЛЕНО */
 }
 
 .filter-header {
@@ -716,15 +723,12 @@ select.form-control {
   margin-bottom: 0;
 }
 
-/* Main Content */
+/* Main Content (Center) */
 .main-content {
   display: flex;
   flex-direction: column;
   gap: var(--space-24);
-  position: sticky; /* ДОБАВЛЕНО */
-  top: var(--space-24); /* ДОБАВЛЕНО */
-  align-self: start; /* ДОБАВЛЕНО */
-  background: var(--color-background); /* ДОБАВЛЕНО */
+  /* MODIFIED: This column should NOT be sticky. It's the main scrollable area. */
 }
 
 /* Stats Cards */
@@ -847,18 +851,17 @@ select.form-control {
   white-space: nowrap;
 }
 
-/* Stats Panel */
+/* Stats Panel (Right Sidebar) */
 .stats-panel {
   display: flex;
   flex-direction: column;
   gap: var(--space-16);
-  height: fit-content;
+  /* MODIFIED: position: sticky makes this panel "stick" to the top on scroll */
   position: sticky;
   top: var(--space-24);
-  align-self: start; /* ДОБАВЛЕНО */
-  background: var(--color-background); /* ДОБАВЛЕНО */
+  /* NEW: A solid background is required to prevent content from showing through during scroll */
+  background: var(--color-background);
 }
-
 
 .stats-panel .card__body {
   position: relative;
@@ -868,9 +871,6 @@ select.form-control {
 .stats-panel canvas {
   max-height: 200px !important;
 }
-
-
-
 
 /* Active Filters */
 .active-filters {
@@ -893,6 +893,13 @@ select.form-control {
   margin: var(--space-2);
   font-weight: var(--font-weight-medium);
 }
+
+/* 
+==============================================
+    END: REWORKED DASHBOARD LAYOUT STYLES
+==============================================
+*/
+
 
 /* Loading State */
 .loading {
@@ -957,73 +964,51 @@ select.form-control {
 }
 
 
-
-
-
-/* --- НАЧАЛО БЛОКА ДЛЯ ЗАМЕНЫ --- */
-
-/* Responsive Design */
+/* 
+==============================================
+    START: REWORKED RESPONSIVE STYLES
+==============================================
+*/
 @media (max-width: 1280px) {
-  /* Для экранов меньше 1280px (например, ноутбуки или планшеты в альбомной ориентации) 
-     перестраиваем макет в ДВЕ колонки. Правую панель статистики переносим вниз. */
+  /* On medium screens, switch to a 2-column layout */
   .dashboard-container {
-    grid-template-columns: 260px 1fr; /* Две колонки: фильтры и основной контент */
+    grid-template-columns: 260px 1fr;
     gap: var(--space-16);
     padding: var(--space-16);
   }
 
-  .main-content {
-    grid-column: 2 / 3; /* Основной контент занимает вторую колонку */
-  }
-
   .stats-panel {
-    grid-column: 1 / -1; /* Панель статистики растягивается на всю ширину */
-    grid-row: 2; /* и перемещается во вторую строку */
-    position: static;
+    /* The right panel moves to a new row, spanning all columns */
+    grid-column: 1 / -1;
+    /* NEW: We must disable sticky positioning when the layout changes */
+    position: static; 
+    
+    /* Make the cards inside arrange themselves nicely */
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: var(--space-16);
-  }
-
-  .stats-panel .card {
-    height: 100%; /* Убедимся, что карточки в панели статистики одинаковой высоты */
+    background: none; /* No background needed when it's not a sidebar */
   }
 }
 
 @media (max-width: 968px) {
-  /* Для экранов меньше 968px (планшеты в портретной ориентации и мобильные)
-     перестраиваем все в ОДНУ колонку. */
+  /* On small screens, switch to a single-column layout */
   .dashboard-container {
-    grid-template-columns: 1fr; /* Одна колонка */
-    gap: var(--space-16);
+    grid-template-columns: 1fr;
   }
 
-  .main-content,
-  .stats-panel {
-    grid-column: 1 / -1; /* Все элементы занимают всю ширину */
-  }
-  
+  /* NEW: Disable sticky positioning for the filter panel in single-column view */
   .filters-panel {
-    order: 1; /* Фильтры идут первыми */
     position: static;
   }
   
-  .main-content {
-    order: 2; /* Затем основной контент */
-  }
-
-  .stats-panel {
-    order: 3; /* Панель статистики идет последней */
-    grid-row: auto; /* Сбрасываем позицию строки */
-    grid-template-columns: 1fr; /* В одну колонку на мобильных */
-  }
-
   .stats-cards {
-    grid-template-columns: 1fr; /* Карточки статистики тоже в одну колонку */
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   }
 }
 
 @media (max-width: 640px) {
+  /* On mobile screens, further adjustments */
   .header {
     padding: var(--space-16);
   }
@@ -1036,8 +1021,12 @@ select.form-control {
     padding: var(--space-12);
   }
 
+  .stats-cards {
+    grid-template-columns: 1fr;
+  }
+
   .charts-container {
-      grid-template-columns: 1fr;
+    grid-template-columns: 1fr;
   }
 
   .table-wrapper {
@@ -1050,9 +1039,11 @@ select.form-control {
   }
 }
 
-/* --- КОНЕЦ БЛОКА ДЛЯ ЗАМЕНЫ --- */
-
-
+/* 
+==============================================
+    END: REWORKED RESPONSIVE STYLES
+==============================================
+*/
 
 
 /* Chart specific styles */
