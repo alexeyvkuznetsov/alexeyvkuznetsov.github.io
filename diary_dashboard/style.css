@@ -684,13 +684,14 @@ select.form-control {
 
 /* Filters Panel */
 .filters-panel {
-  background: var(--color-surface);
+  background: var(--color-background); /* ИЗМЕНЕНО */
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--space-20);
   height: fit-content;
   position: sticky;
   top: var(--space-24);
+  align-self: start; /* ДОБАВЛЕНО */
 }
 
 .filter-header {
@@ -720,6 +721,10 @@ select.form-control {
   display: flex;
   flex-direction: column;
   gap: var(--space-24);
+  position: sticky; /* ДОБАВЛЕНО */
+  top: var(--space-24); /* ДОБАВЛЕНО */
+  align-self: start; /* ДОБАВЛЕНО */
+  background: var(--color-background); /* ДОБАВЛЕНО */
 }
 
 /* Stats Cards */
@@ -850,22 +855,9 @@ select.form-control {
   height: fit-content;
   position: sticky;
   top: var(--space-24);
+  align-self: start; /* ДОБАВЛЕНО */
+  background: var(--color-background); /* ДОБАВЛЕНО */
 }
-
-/* --- НАЧАЛО БЛОКА ДЛЯ ДОБАВЛЕНИЯ --- */
-
-/* 
-  Синхронизируем "липкое" позиционирование для всех колонок,
-  чтобы они оставались на одном уровне при прокрутке.
-*/
-.main-content,
-.stats-panel {
-  position: sticky;
-  top: var(--space-24);
-}
-
-/* --- КОНЕЦ БЛОКА ДЛЯ ДОБАВЛЕНИЯ --- */
-
 
 
 .stats-panel .card__body {
