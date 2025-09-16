@@ -655,7 +655,7 @@ select.form-control {
 
 /* 
 ==============================================
-    START: REWORKED DASHBOARD LAYOUT STYLES
+    START: NEW DASHBOARD LAYOUT STYLES
 ==============================================
 */
 
@@ -680,23 +680,34 @@ select.form-control {
 /* Main Dashboard Container */
 .dashboard-container {
   display: grid;
-  /* NEW: align-items: start is crucial for sticky positioning to work correctly
-     without columns stretching to the height of the longest column. */
   align-items: start; 
+  /* We use CSS Grid Areas for a clear and robust layout */
+  grid-template-areas:
+    "filters main stats"
+    "filters table stats";
   grid-template-columns: 280px 1fr 320px;
+  /* Let the rows be sized by their content */
+  grid-template-rows: auto 1fr;
   gap: var(--space-24);
   padding: var(--space-24);
   max-width: 1600px;
   margin: 0 auto;
 }
 
+/* Assigning elements to their grid areas */
+.filters-panel { grid-area: filters; }
+.main-content  { grid-area: main; }
+.table-container { grid-area: table; }
+.stats-panel   { grid-area: stats; }
+
+
 /* Filters Panel (Left Sidebar) */
 .filters-panel {
   background: var(--color-surface);
-  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
   padding: var(--space-20);
-  /* MODIFIED: position: sticky makes this panel "stick" to the top on scroll */
+  /* The left panel is the only one that sticks to the top */
   position: sticky;
   top: var(--space-24);
 }
@@ -710,45 +721,31 @@ select.form-control {
   border-bottom: 1px solid var(--color-border);
 }
 
-.filter-header h3 {
-  margin: 0;
-  color: var(--color-text);
-}
+.filter-header h3 { margin: 0; }
+.filter-group { margin-bottom: var(--space-16); }
+.filter-group:last-child { margin-bottom: 0; }
 
-.filter-group {
-  margin-bottom: var(--space-16);
-}
-
-.filter-group:last-child {
-  margin-bottom: 0;
-}
-
-/* Main Content (Center) */
+/* Main Content (Top Center) - Cards and Charts */
 .main-content {
   display: flex;
   flex-direction: column;
   gap: var(--space-24);
-  /* MODIFIED: This column should NOT be sticky. It's the main scrollable area. */
 }
 
 /* Stats Cards */
 .stats-cards {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: var(--space-16);
 }
 
-.stats-card .card__body {
-  text-align: center;
-}
-
+.stats-card .card__body { text-align: center; }
 .stats-card h4 {
   margin-bottom: var(--space-8);
   color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
 }
-
 .stat-value {
   font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-bold);
@@ -761,50 +758,35 @@ select.form-control {
   grid-template-columns: 1fr 1fr;
   gap: var(--space-16);
 }
-
-.chart-card:nth-child(3) {
-  grid-column: 1 / -1;
-}
-
+.chart-card:nth-child(3) { grid-column: 1 / -1; }
 .chart-card .card__body {
   position: relative;
   height: 300px;
 }
+.chart-card canvas { max-height: 300px !important; }
 
-.chart-card canvas {
-  max-height: 300px !important;
-}
-
-/* Table */
-.table-container {
-  width: 100%;
-}
-
+/* Table Container (Bottom Center) */
+.table-container { width: 100%; }
 .table-container .card__header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-
 .table-wrapper {
   overflow-x: auto;
   max-height: 600px;
   overflow-y: auto;
 }
-
 #events-table {
   width: 100%;
   border-collapse: collapse;
   font-size: var(--font-size-sm);
 }
-
-#events-table th,
-#events-table td {
+#events-table th, #events-table td {
   padding: var(--space-12);
   text-align: left;
   border-bottom: 1px solid var(--color-border);
 }
-
 #events-table th {
   background: var(--color-secondary);
   font-weight: var(--font-weight-semibold);
@@ -812,38 +794,13 @@ select.form-control {
   top: 0;
   cursor: pointer;
   user-select: none;
-  transition: background-color var(--duration-fast) var(--ease-standard);
 }
-
-#events-table th:hover {
-  background: var(--color-secondary-hover);
-}
-
-#events-table th[data-sort]::after {
-  content: ' ↕';
-  opacity: 0.5;
-  font-size: var(--font-size-xs);
-}
-
-#events-table th.sort-asc::after {
-  content: ' ↑';
-  opacity: 1;
-}
-
-#events-table th.sort-desc::after {
-  content: ' ↓';
-  opacity: 1;
-}
-
-#events-table tbody tr {
-    cursor: pointer;
-    transition: background-color var(--duration-fast) var(--ease-standard);
-}
-
-#events-table tbody tr:hover {
-  background: var(--color-secondary);
-}
-
+#events-table th:hover { background: var(--color-secondary-hover); }
+#events-table th[data-sort]::after { content: ' ↕'; opacity: 0.5; font-size: var(--font-size-xs); }
+#events-table th.sort-asc::after { content: ' ↑'; opacity: 1; }
+#events-table th.sort-desc::after { content: ' ↓'; opacity: 1; }
+#events-table tbody tr { cursor: pointer; }
+#events-table tbody tr:hover { background: var(--color-secondary); }
 #events-table td:last-child {
   max-width: 300px;
   overflow: hidden;
@@ -856,33 +813,21 @@ select.form-control {
   display: flex;
   flex-direction: column;
   gap: var(--space-16);
-  /* MODIFIED: position: sticky makes this panel "stick" to the top on scroll */
-  position: sticky;
-  top: var(--space-24);
-  /* NEW: A solid background is required to prevent content from showing through during scroll */
-  background: var(--color-background);
+  /* The right panel scrolls normally with the page. NO STICKY. */
 }
-
 .stats-panel .card__body {
   position: relative;
   height: 200px;
 }
-
-.stats-panel canvas {
-  max-height: 200px !important;
-}
+.stats-panel canvas { max-height: 200px !important; }
 
 /* Active Filters */
-.active-filters {
-  min-height: 60px;
-}
-
+.active-filters { min-height: 60px; }
 .active-filters .no-filters {
   color: var(--color-text-secondary);
   font-style: italic;
   margin: 0;
 }
-
 .filter-tag {
   display: inline-block;
   background: var(--color-primary);
@@ -896,12 +841,66 @@ select.form-control {
 
 /* 
 ==============================================
-    END: REWORKED DASHBOARD LAYOUT STYLES
+    START: RESPONSIVE STYLES
+==============================================
+*/
+@media (max-width: 1200px) {
+  /* On medium screens, move right stats panel below main content */
+  .dashboard-container {
+    grid-template-areas:
+      "filters main"
+      "filters table"
+      "stats   stats"; /* Stats panel now spans the full width at the bottom */
+    grid-template-columns: 260px 1fr;
+    grid-template-rows: auto auto 1fr;
+    gap: var(--space-16);
+    padding: var(--space-16);
+  }
+  
+  .stats-panel {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--space-16);
+  }
+}
+
+@media (max-width: 968px) {
+  /* On small screens, stack everything in a single column */
+  .dashboard-container {
+    grid-template-areas:
+      "filters"
+      "main"
+      "stats"
+      "table";
+    grid-template-columns: 1fr;
+    grid-template-rows: auto; /* All rows size automatically */
+  }
+
+  /* Disable sticky behavior when in a single column */
+  .filters-panel {
+    position: static;
+  }
+}
+
+@media (max-width: 640px) {
+  /* Mobile-specific tweaks */
+  .header { padding: var(--space-16); }
+  .header h1 { font-size: var(--font-size-2xl); }
+  .dashboard-container { padding: var(--space-12); }
+  .stats-cards, .charts-container { grid-template-columns: 1fr; }
+  .table-wrapper { font-size: var(--font-size-xs); }
+  #events-table th, #events-table td { padding: var(--space-8); }
+}
+
+/* 
+==============================================
+    END: NEW DASHBOARD LAYOUT STYLES
 ==============================================
 */
 
+/* --- The rest of the styles are unchanged --- */
 
-/* Loading State */
+/* Loading State, Status Badges, etc. */
 .loading {
   position: fixed;
   top: 0;
@@ -916,11 +915,7 @@ select.form-control {
   z-index: 1000;
   color: var(--color-surface);
 }
-
-.loading.hidden {
-  display: none;
-}
-
+.loading.hidden { display: none; }
 .loading-spinner {
   width: 40px;
   height: 40px;
@@ -930,13 +925,10 @@ select.form-control {
   animation: spin 1s linear infinite;
   margin-bottom: var(--space-16);
 }
-
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
-
-/* Status badges */
 .status-badge {
   display: inline-block;
   padding: var(--space-2) var(--space-6);
@@ -944,170 +936,52 @@ select.form-control {
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
 }
-
 .status-badge--high {
   background: rgba(var(--color-success-rgb), 0.15);
   color: var(--color-success);
   border: 1px solid rgba(var(--color-success-rgb), 0.25);
 }
-
 .status-badge--medium {
   background: rgba(var(--color-warning-rgb), 0.15);
   color: var(--color-warning);
   border: 1px solid rgba(var(--color-warning-rgb), 0.25);
 }
-
 .status-badge--low {
   background: rgba(var(--color-error-rgb), 0.15);
   color: var(--color-error);
   border: 1px solid rgba(var(--color-error-rgb), 0.25);
 }
-
-
-/* 
-==============================================
-    START: REWORKED RESPONSIVE STYLES
-==============================================
-*/
-@media (max-width: 1280px) {
-  /* On medium screens, switch to a 2-column layout */
-  .dashboard-container {
-    grid-template-columns: 260px 1fr;
-    gap: var(--space-16);
-    padding: var(--space-16);
-  }
-
-  .stats-panel {
-    /* The right panel moves to a new row, spanning all columns */
-    grid-column: 1 / -1;
-    /* NEW: We must disable sticky positioning when the layout changes */
-    position: static; 
-    
-    /* Make the cards inside arrange themselves nicely */
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: var(--space-16);
-    background: none; /* No background needed when it's not a sidebar */
-  }
-}
-
-@media (max-width: 968px) {
-  /* On small screens, switch to a single-column layout */
-  .dashboard-container {
-    grid-template-columns: 1fr;
-  }
-
-  /* NEW: Disable sticky positioning for the filter panel in single-column view */
-  .filters-panel {
-    position: static;
-  }
-  
-  .stats-cards {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  }
-}
-
-@media (max-width: 640px) {
-  /* On mobile screens, further adjustments */
-  .header {
-    padding: var(--space-16);
-  }
-
-  .header h1 {
-    font-size: var(--font-size-2xl);
-  }
-
-  .dashboard-container {
-    padding: var(--space-12);
-  }
-
-  .stats-cards {
-    grid-template-columns: 1fr;
-  }
-
-  .charts-container {
-    grid-template-columns: 1fr;
-  }
-
-  .table-wrapper {
-    font-size: var(--font-size-xs);
-  }
-
-  #events-table th,
-  #events-table td {
-    padding: var(--space-8);
-  }
-}
-
-/* 
-==============================================
-    END: REWORKED RESPONSIVE STYLES
-==============================================
-*/
-
-
-/* Chart specific styles */
 .chart-container {
   position: relative;
   height: 300px;
   width: 100%;
 }
-
-.chart-container canvas {
-  max-height: 300px !important;
-}
-
-/* Custom scrollbar */
-.table-wrapper::-webkit-scrollbar,
-.emotion-chronology::-webkit-scrollbar {
+.chart-container canvas { max-height: 300px !important; }
+.table-wrapper::-webkit-scrollbar, .emotion-chronology::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
-
-.table-wrapper::-webkit-scrollbar-track,
-.emotion-chronology::-webkit-scrollbar-track {
+.table-wrapper::-webkit-scrollbar-track, .emotion-chronology::-webkit-scrollbar-track {
   background: var(--color-secondary);
 }
-
-.table-wrapper::-webkit-scrollbar-thumb,
-.emotion-chronology::-webkit-scrollbar-thumb {
+.table-wrapper::-webkit-scrollbar-thumb, .emotion-chronology::-webkit-scrollbar-thumb {
   background: var(--color-border);
   border-radius: var(--radius-sm);
 }
-
-.table-wrapper::-webkit-scrollbar-thumb:hover,
-.emotion-chronology::-webkit-scrollbar-thumb:hover {
+.table-wrapper::-webkit-scrollbar-thumb:hover, .emotion-chronology::-webkit-scrollbar-thumb:hover {
   background: var(--color-text-secondary);
 }
-
-/* Hover effects */
-.card:hover {
+.card:hover, .btn:hover {
   transform: translateY(-1px);
   transition: transform var(--duration-fast) var(--ease-standard);
 }
-
-.btn:hover {
-  transform: translateY(-1px);
-  transition: transform var(--duration-fast) var(--ease-standard);
-}
-
-/* Focus styles */
-.form-control:focus {
-  box-shadow: var(--focus-ring);
-}
-
-/* Empty state */
+.form-control:focus { box-shadow: var(--focus-ring); }
 .empty-state {
   text-align: center;
   padding: var(--space-32);
   color: var(--color-text-secondary);
 }
-
-.empty-state h4 {
-  margin-bottom: var(--space-8);
-}
-
-/* Modal Window Styles */
+.empty-state h4 { margin-bottom: var(--space-8); }
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -1122,12 +996,10 @@ select.form-control {
   opacity: 1;
   transition: opacity var(--duration-normal) var(--ease-standard);
 }
-
 .modal-overlay.hidden {
   opacity: 0;
   pointer-events: none;
 }
-
 .modal {
   background: var(--color-surface);
   color: var(--color-text);
@@ -1141,11 +1013,7 @@ select.form-control {
   transform: scale(1);
   transition: transform var(--duration-normal) var(--ease-standard);
 }
-
-.modal-overlay.hidden .modal {
-    transform: scale(0.95);
-}
-
+.modal-overlay.hidden .modal { transform: scale(0.95); }
 .modal__header {
   display: flex;
   justify-content: space-between;
@@ -1153,12 +1021,10 @@ select.form-control {
   padding: var(--space-16);
   border-bottom: 1px solid var(--color-border);
 }
-
 .modal__header h3 {
   margin: 0;
   font-size: var(--font-size-xl);
 }
-
 .btn--close {
   background: none;
   border: none;
@@ -1168,33 +1034,23 @@ select.form-control {
   cursor: pointer;
   padding: 0 var(--space-8);
 }
-
 .modal__body {
   padding: var(--space-20);
   overflow-y: auto;
 }
-
-.modal-detail-item {
-  margin-bottom: var(--space-12);
-}
-
+.modal-detail-item { margin-bottom: var(--space-12); }
 .modal-detail-item strong {
   display: block;
   color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
   margin-bottom: var(--space-4);
 }
-
-.modal-detail-item p {
-  margin: 0;
-}
-
+.modal-detail-item p { margin: 0; }
 .modal-keywords {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-6);
 }
-
 .keyword-tag {
   background: var(--color-secondary);
   color: var(--color-text);
@@ -1202,8 +1058,6 @@ select.form-control {
   border-radius: var(--radius-sm);
   font-size: var(--font-size-xs);
 }
-
-/* Keyword Cloud Styles */
 .keyword-cloud {
     display: flex;
     flex-wrap: wrap;
@@ -1212,23 +1066,16 @@ select.form-control {
     gap: var(--space-4) var(--space-8);
     min-height: 150px;
 }
-
 .keyword-cloud-item {
     cursor: default;
     transition: color var(--duration-fast) ease-in-out;
 }
-
-.keyword-cloud-item:hover {
-    color: var(--color-primary);
-}
-
-/* Emotion Chronology Styles */
+.keyword-cloud-item:hover { color: var(--color-primary); }
 .emotion-chronology {
     max-height: 400px;
     overflow-y: auto;
     padding-right: var(--space-8);
 }
-
 .emotion-item {
     padding-bottom: var(--space-12);
     margin-bottom: var(--space-12);
@@ -1238,7 +1085,6 @@ select.form-control {
     border-bottom: none;
     margin-bottom: 0;
 }
-
 .emotion-header {
     display: flex;
     justify-content: space-between;
@@ -1246,17 +1092,14 @@ select.form-control {
     font-size: var(--font-size-sm);
     margin-bottom: var(--space-6);
 }
-
 .emotion-header__date {
     font-weight: var(--font-weight-medium);
     color: var(--color-text-secondary);
 }
-
 .emotion-header__type {
     font-weight: var(--font-weight-semibold);
     text-align: right;
 }
-
 .emotion-quote {
     font-size: var(--font-size-sm);
     font-style: italic;
@@ -1265,9 +1108,6 @@ select.form-control {
     padding-left: var(--space-12);
     margin: 0;
 }
-
-
-/* Accessibility improvements */
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.01ms !important;
@@ -1275,26 +1115,18 @@ select.form-control {
     transition-duration: 0.01ms !important;
   }
 }
-
-/* High contrast mode */
 @media (prefers-contrast: high) {
   :root {
     --color-border: #000;
     --color-text-secondary: #333;
   }
 }
-
-/* Print styles */
 @media print {
   .filters-panel,
   .stats-panel {
     display: none;
   }
-
-  .dashboard-container {
-    grid-template-columns: 1fr;
-  }
-
+  .dashboard-container { grid-template-columns: 1fr; }
   .card {
     box-shadow: none;
     border: 2px solid var(--color-border);

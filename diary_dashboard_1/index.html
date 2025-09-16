@@ -10,7 +10,7 @@
 <body>
     <div id="app">
         <header class="header">
-            <h1>Дашборд "Восприятие революций 1848-1849 гг. на материале дневника Кирилла Березкина за 1849 год"</h1>
+            <h1>Дашборд "Восприятие революций 1848-1849 гг. на материале дневника Кирилла Березкина за 1849 года</h1>
             <p class="header-subtitle">Анализ событий периода революций 1848-49 годов</p>
         </header>
 
@@ -63,7 +63,7 @@
                 </div>
             </aside>
 
-            <!-- Основная область -->
+            <!-- Основная область (теперь только верхние блоки) -->
             <main class="main-content">
                 <!-- Карточки статистики -->
                 <div class="stats-cards">
@@ -122,35 +122,35 @@
                         </div>
                     </div>
                 </div>
+            </main>
 
-                <!-- Таблица событий -->
-                <div class="table-container">
-                    <div class="card">
-                        <div class="card__header">
-                            <h4>Детальная информация о событиях</h4>
-                            <button id="export-csv" class="btn btn--sm btn--primary">Экспорт в CSV</button>
-                        </div>
-                        <div class="card__body">
-                            <div class="table-wrapper">
-                                <table id="events-table">
-                                    <thead>
-                                        <tr>
-                                            <th data-sort="source_date">Дата</th>
-                                            <th data-sort="event_name">Событие</th>
-                                            <th data-sort="location_normalized">Локация</th>
-                                            <th data-sort="information_source_type">Источник</th>
-                                            <th data-sort="confidence">Достоверность</th>
-                                            <th>Описание</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="events-tbody">
-                                    </tbody>
-                                </table>
-                            </div>
+            <!-- Таблица событий (ПЕРЕМЕЩЕНА ИЗ MAIN) -->
+            <div class="table-container">
+                <div class="card">
+                    <div class="card__header">
+                        <h4>Детальная информация о событиях</h4>
+                        <button id="export-csv" class="btn btn--sm btn--primary">Экспорт в CSV</button>
+                    </div>
+                    <div class="card__body">
+                        <div class="table-wrapper">
+                            <table id="events-table">
+                                <thead>
+                                    <tr>
+                                        <th data-sort="source_date">Дата</th>
+                                        <th data-sort="event_name">Событие</th>
+                                        <th data-sort="location_normalized">Локация</th>
+                                        <th data-sort="information_source_type">Источник</th>
+                                        <th data-sort="confidence">Достоверность</th>
+                                        <th>Описание</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="events-tbody">
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
-            </main>
+            </div>
 
             <!-- Статистическая панель -->
             <aside class="stats-panel">
