@@ -945,37 +945,70 @@ select.form-control {
   border: 1px solid rgba(var(--color-error-rgb), 0.25);
 }
 
+
+
+
+
+/* --- НАЧАЛО БЛОКА ДЛЯ ЗАМЕНЫ --- */
+
 /* Responsive Design */
-@media (max-width: 1200px) {
+@media (max-width: 1280px) {
+  /* Для экранов меньше 1280px (например, ноутбуки или планшеты в альбомной ориентации) 
+     перестраиваем макет в ДВЕ колонки. Правую панель статистики переносим вниз. */
   .dashboard-container {
-    grid-template-columns: 260px 1fr 280px;
+    grid-template-columns: 260px 1fr; /* Две колонки: фильтры и основной контент */
     gap: var(--space-16);
     padding: var(--space-16);
   }
 
-  .charts-container {
-    grid-template-columns: 1fr;
+  .main-content {
+    grid-column: 2 / 3; /* Основной контент занимает вторую колонку */
   }
 
-  .chart-card:nth-child(3) {
-    grid-column: 1;
+  .stats-panel {
+    grid-column: 1 / -1; /* Панель статистики растягивается на всю ширину */
+    grid-row: 2; /* и перемещается во вторую строку */
+    position: static;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--space-16);
+  }
+
+  .stats-panel .card {
+    height: 100%; /* Убедимся, что карточки в панели статистики одинаковой высоты */
   }
 }
 
 @media (max-width: 968px) {
+  /* Для экранов меньше 968px (планшеты в портретной ориентации и мобильные)
+     перестраиваем все в ОДНУ колонку. */
   .dashboard-container {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr; /* Одна колонка */
     gap: var(--space-16);
   }
 
-  .filters-panel,
+  .main-content,
   .stats-panel {
+    grid-column: 1 / -1; /* Все элементы занимают всю ширину */
+  }
+  
+  .filters-panel {
+    order: 1; /* Фильтры идут первыми */
     position: static;
-    order: -1;
+  }
+  
+  .main-content {
+    order: 2; /* Затем основной контент */
+  }
+
+  .stats-panel {
+    order: 3; /* Панель статистики идет последней */
+    grid-row: auto; /* Сбрасываем позицию строки */
+    grid-template-columns: 1fr; /* В одну колонку на мобильных */
   }
 
   .stats-cards {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr; /* Карточки статистики тоже в одну колонку */
   }
 }
 
@@ -992,8 +1025,8 @@ select.form-control {
     padding: var(--space-12);
   }
 
-  .stats-cards {
-    grid-template-columns: 1fr;
+  .charts-container {
+      grid-template-columns: 1fr;
   }
 
   .table-wrapper {
@@ -1005,6 +1038,11 @@ select.form-control {
     padding: var(--space-8);
   }
 }
+
+/* --- КОНЕЦ БЛОКА ДЛЯ ЗАМЕНЫ --- */
+
+
+
 
 /* Chart specific styles */
 .chart-container {
