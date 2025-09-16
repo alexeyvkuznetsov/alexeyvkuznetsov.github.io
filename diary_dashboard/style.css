@@ -852,6 +852,22 @@ select.form-control {
   top: var(--space-24);
 }
 
+/* --- НАЧАЛО БЛОКА ДЛЯ ДОБАВЛЕНИЯ --- */
+
+/* 
+  Синхронизируем "липкое" позиционирование для всех колонок,
+  чтобы они оставались на одном уровне при прокрутке.
+*/
+.main-content,
+.stats-panel {
+  position: sticky;
+  top: var(--space-24);
+}
+
+/* --- КОНЕЦ БЛОКА ДЛЯ ДОБАВЛЕНИЯ --- */
+
+
+
 .stats-panel .card__body {
   position: relative;
   height: 200px;
@@ -860,6 +876,9 @@ select.form-control {
 .stats-panel canvas {
   max-height: 200px !important;
 }
+
+
+
 
 /* Active Filters */
 .active-filters {
